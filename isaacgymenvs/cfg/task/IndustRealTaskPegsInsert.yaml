@@ -115,3 +115,6 @@ ctrl:
         task_deriv_gains: [8, 8, 8, 8, 8, 8]
         force_ctrl_axes: [0, 0, 1, 0, 0, 0]
         wrench_prop_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+visuo_servo:
+    enable_plug_random_rot: True
+    plug_random_rot_noise: [0.0, 0.3, 0.0]  # noise on plug rotation

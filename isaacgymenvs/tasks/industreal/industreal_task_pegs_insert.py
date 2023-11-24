@@ -98,12 +98,16 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
 
         if self.viewer != None:
             self._set_viewer_params()
+        # visual servo related
+        self.enable_plug_random_rot = self.cfg_task.visuo_servo.enable_plug_random_rot
+        self.plug_random_rot_noise = self.cfg_task.visuo_servo.plug_random_rot_noise
 
     def _get_task_yaml_params(self):
         """Initialize instance variables from YAML files."""
 
         cs = hydra.core.config_store.ConfigStore.instance()
-        cs.store(name="factory_schema_config_task", node=FactorySchemaConfigTask)
+        cs.store(name="factory_schema_config_task",
+                 node=FactorySchemaConfigTask)
 
         self.cfg_task = omegaconf.OmegaConf.create(self.cfg)
         self.max_episode_length = (
@@ -131,7 +135,8 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
                 [
                     0.0,
                     0.0,
-                    (self.cfg_task.env.socket_base_height + self.plug_grasp_offsets[i]),
+                    (self.cfg_task.env.socket_base_height +
+                     self.plug_grasp_offsets[i]),
                 ]
                 for i in range(self.num_envs)
             ],
@@ -147,7 +152,8 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
 
         # Define keypoint tensors
         self.keypoint_offsets = (
-            algo_utils.get_keypoint_offsets(self.cfg_task.rl.num_keypoints, self.device)
+            algo_utils.get_keypoint_offsets(
+                self.cfg_task.rl.num_keypoints, self.device)
             * self.cfg_task.rl.keypoint_scale
         )
         self.keypoints_plug = torch.zeros(
@@ -188,7 +194,8 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
             self.socket_pos, dtype=torch.float32, device=self.device
         )
         socket_obs_pos_noise = 2 * (
-            torch.rand((self.num_envs, 3), dtype=torch.float32, device=self.device)
+            torch.rand((self.num_envs, 3),
+                       dtype=torch.float32, device=self.device)
             - 0.5
         )
         socket_obs_pos_noise = socket_obs_pos_noise @ torch.diag(
@@ -199,16 +206,20 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
             )
         )
 
-        self.noisy_socket_pos[:, 0] = self.socket_pos[:, 0] + socket_obs_pos_noise[:, 0]
-        self.noisy_socket_pos[:, 1] = self.socket_pos[:, 1] + socket_obs_pos_noise[:, 1]
-        self.noisy_socket_pos[:, 2] = self.socket_pos[:, 2] + socket_obs_pos_noise[:, 2]
+        self.noisy_socket_pos[:, 0] = self.socket_pos[:,
+                                                      0] + socket_obs_pos_noise[:, 0]
+        self.noisy_socket_pos[:, 1] = self.socket_pos[:,
+                                                      1] + socket_obs_pos_noise[:, 1]
+        self.noisy_socket_pos[:, 2] = self.socket_pos[:,
+                                                      2] + socket_obs_pos_noise[:, 2]
 
         # Add observation noise to socket rot
         socket_rot_euler = torch.zeros(
             (self.num_envs, 3), dtype=torch.float32, device=self.device
         )
         socket_obs_rot_noise = 2 * (
-            torch.rand((self.num_envs, 3), dtype=torch.float32, device=self.device)
+            torch.rand((self.num_envs, 3),
+                       dtype=torch.float32, device=self.device)
             - 0.5
         )
         socket_obs_rot_noise = socket_obs_rot_noise @ torch.diag(
@@ -338,8 +349,10 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
                 1
             ],  # 4
             delta_pos,  # 3
-            self.pose_world_to_robot_base(self.plug_pos, self.plug_quat)[0],  # 3
-            self.pose_world_to_robot_base(self.plug_pos, self.plug_quat)[1],  # 4
+            self.pose_world_to_robot_base(
+                self.plug_pos, self.plug_quat)[0],  # 3
+            self.pose_world_to_robot_base(
+                self.plug_pos, self.plug_quat)[1],  # 4
             noisy_delta_pos - delta_pos,
         ]  # 3
 
@@ -496,7 +509,8 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
         self._move_gripper_to_grasp_pose(
             sim_steps=self.cfg_task.env.num_gripper_move_sim_steps
         )
-        self.close_gripper(sim_steps=self.cfg_task.env.num_gripper_close_sim_steps)
+        self.close_gripper(
+            sim_steps=self.cfg_task.env.num_gripper_close_sim_steps)
         self.enable_gravity()
 
         # Get plug SDF in goal pose for SDF-based reward
@@ -572,7 +586,8 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
 
         # Randomize socket pos
         socket_noise_xy = 2 * (
-            torch.rand((self.num_envs, 2), dtype=torch.float32, device=self.device)
+            torch.rand((self.num_envs, 2),
+                       dtype=torch.float32, device=self.device)
             - 0.5
         )
         socket_noise_xy = socket_noise_xy @ torch.diag(
@@ -609,7 +624,8 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
 
         # Randomize socket rot
         socket_rot_noise = 2 * (
-            torch.rand((self.num_envs, 3), dtype=torch.float32, device=self.device)
+            torch.rand((self.num_envs, 3),
+                       dtype=torch.float32, device=self.device)
             - 0.5
         )
         socket_rot_noise = socket_rot_noise @ torch.diag(
@@ -620,11 +636,13 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
             )
         )
         socket_rot_euler = (
-            torch.zeros((self.num_envs, 3), dtype=torch.float32, device=self.device)
+            torch.zeros((self.num_envs, 3),
+                        dtype=torch.float32, device=self.device)
             + socket_rot_noise
         )
         socket_rot_quat = torch_utils.quat_from_euler_xyz(
-            socket_rot_euler[:, 0], socket_rot_euler[:, 1], socket_rot_euler[:, 2]
+            socket_rot_euler[:, 0], socket_rot_euler[:,
+                                                     1], socket_rot_euler[:, 2]
         )
         self.socket_quat[:, :] = socket_rot_quat.clone()
 
@@ -650,17 +668,20 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
         if before_move_to_grasp:
             # Generate randomized downward displacement based on curriculum
             curr_curriculum_disp_range = (
-                self.curr_max_disp - self.cfg_task.rl.curriculum_height_bound[0]
+                self.curr_max_disp -
+                self.cfg_task.rl.curriculum_height_bound[0]
             )
             self.curriculum_disp = self.cfg_task.rl.curriculum_height_bound[
                 0
             ] + curr_curriculum_disp_range * (
-                torch.rand((self.num_envs,), dtype=torch.float32, device=self.device)
+                torch.rand((self.num_envs,), dtype=torch.float32,
+                           device=self.device)
             )
 
             # Generate plug pos noise
             self.plug_pos_xy_noise = 2 * (
-                torch.rand((self.num_envs, 2), dtype=torch.float32, device=self.device)
+                torch.rand((self.num_envs, 2),
+                           dtype=torch.float32, device=self.device)
                 - 0.5
             )
             self.plug_pos_xy_noise = self.plug_pos_xy_noise @ torch.diag(
@@ -686,7 +707,21 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
             plug_partial_insert_idx
         ]
 
-        self.plug_quat[:, :] = self.identity_quat.clone()
+        # Apply random rotation
+        if self.enable_plug_random_rot:
+            plug_rot_noise = torch.ones(
+                (self.num_envs, 3), dtype=torch.float32, device=self.device
+            )
+            plug_rot_noise[:, 0] *= self.plug_random_rot_noise[0]
+            plug_rot_noise[:, 1] *= self.plug_random_rot_noise[1]
+            plug_rot_noise[:, 2] *= self.plug_random_rot_noise[2]
+            plug_quat = torch_utils.quat_from_euler_xyz(
+                plug_rot_noise[:, 0], plug_rot_noise[:, 1], plug_rot_noise[:, 2]
+            )
+            self.plug_quat[:, :] = plug_quat.clone()
+            self.plug_pos[:, 2] += 0.01
+        else:
+            self.plug_quat[:, :] = self.identity_quat.clone()
 
         # Stabilize plug
         self.plug_linvel[:, :] = 0.0
@@ -726,7 +761,8 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
         pos_actions = actions[:, 0:3]
         if do_scale:
             pos_actions = pos_actions @ torch.diag(
-                torch.tensor(self.cfg_task.rl.pos_action_scale, device=self.device)
+                torch.tensor(self.cfg_task.rl.pos_action_scale,
+                             device=self.device)
             )
         self.ctrl_target_fingertip_centered_pos = (
             self.fingertip_centered_pos + pos_actions
@@ -736,7 +772,8 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
         rot_actions = actions[:, 3:6]
         if do_scale:
             rot_actions = rot_actions @ torch.diag(
-                torch.tensor(self.cfg_task.rl.rot_action_scale, device=self.device)
+                torch.tensor(self.cfg_task.rl.rot_action_scale,
+                             device=self.device)
             )
 
         # Convert to quat and set rot target
@@ -745,7 +782,8 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
         rot_actions_quat = torch_utils.quat_from_angle_axis(angle, axis)
         if self.cfg_task.rl.clamp_rot:
             rot_actions_quat = torch.where(
-                angle.unsqueeze(-1).repeat(1, 4) > self.cfg_task.rl.clamp_rot_thresh,
+                angle.unsqueeze(-1).repeat(1,
+                                           4) > self.cfg_task.rl.clamp_rot_thresh,
                 rot_actions_quat,
                 torch.tensor([0.0, 0.0, 0.0, 1.0], device=self.device).repeat(
                     self.num_envs, 1
@@ -764,7 +802,13 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
 
         # Set target_pos
         self.ctrl_target_fingertip_midpoint_pos = self.plug_pos.clone()
-        self.ctrl_target_fingertip_midpoint_pos[:, 2] += self.plug_grasp_offsets
+        self.ctrl_target_fingertip_midpoint_pos[:,
+                                                2] += self.plug_grasp_offsets
+        if self.enable_plug_random_rot:
+            # Compensate rotation along y-axis to compensate for random rotation
+            self.ctrl_target_fingertip_midpoint_pos[:, 0] += self.plug_grasp_offsets * torch.sin(
+                torch.Tensor([self.plug_random_rot_noise[1]])
+            ).to(self.device)
 
         # Set target rot
         ctrl_target_fingertip_centered_euler = (
