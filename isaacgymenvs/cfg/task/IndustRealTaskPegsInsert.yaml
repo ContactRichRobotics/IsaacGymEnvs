@@ -9,7 +9,7 @@ name: IndustRealTaskPegsInsert
 physics_engine: ${..physics_engine}
 
 env:
-    numEnvs: 128
+    numEnvs: 256
     numObservations: 24
     numStates: 47
     numActions: 6
@@ -116,5 +116,5 @@ ctrl:
         force_ctrl_axes: [0, 0, 1, 0, 0, 0]
         wrench_prop_gains: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 visuo_servo:
-    enable_plug_random_rot: True
+    enable_plug_random_rot: False
     plug_random_rot_noise: [0.0, 0.3, 0.0]  # noise on plug rotation
