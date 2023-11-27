@@ -40,6 +40,7 @@ import numpy as np
 import os
 import torch
 
+from isaacgym import gymtorch
 from isaacgym import gymapi
 from isaacgymenvs.tasks.factory.factory_schema_class_env import FactoryABCEnv
 from isaacgymenvs.tasks.factory.factory_schema_config_env import FactorySchemaConfigEnv
@@ -227,6 +228,7 @@ class IndustRealEnvPegs(IndustRealBase, FactoryABCEnv):
         self.plug_handles = []
         self.socket_handles = []
         self.table_handles = []
+        self.camera_handles = []
         self.shape_ids = []
         self.franka_actor_ids_sim = []  # within-sim indices
         self.plug_actor_ids_sim = []  # within-sim indices
@@ -378,6 +380,10 @@ class IndustRealEnvPegs(IndustRealBase, FactoryABCEnv):
             self.socket_heights.append(socket_height)
             self.asset_indices.append(j)
 
+            # Add camera
+            camera_handle = self._add_camera(env_ptr)
+            self.camera_handles.append(camera_handle)
+
         self.num_actors = int(actor_count / self.num_envs)  # per env
         self.num_bodies = self.gym.get_env_rigid_body_count(env_ptr)  # per env
         self.num_dofs = self.gym.get_env_dof_count(env_ptr)  # per env
@@ -476,3 +482,14 @@ class IndustRealEnvPegs(IndustRealBase, FactoryABCEnv):
         # NOTE: Tensor refresh functions should be called once per step, before setters.
 
         pass
+
+    def get_camera_image_by_env(self, env_index):
+        """Get camera image by env index."""
+        # Create a tensor to hold the image data
+        rgb_image = self.gym.get_camera_image(
+            self.sim, self.env_ptrs[env_index], self.camera_handles[env_index], gymapi.IMAGE_COLOR
+        )
+        depth_image = self.gym.get_camera_image(
+            self.sim, self.env_ptrs[env_index], self.camera_handles[env_index], gymapi.IMAGE_DEPTH
+        )
+        return rgb_image.reshape([256, 256, 4]), depth_image.reshape([256, 256])

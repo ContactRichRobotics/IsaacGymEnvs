@@ -506,6 +506,7 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
         # Close gripper onto plug
         self.disable_gravity()  # to prevent plug from falling
         self._reset_object()
+        self._reset_camera()
         self._move_gripper_to_grasp_pose(
             sim_steps=self.cfg_task.env.num_gripper_move_sim_steps
         )
@@ -738,6 +739,13 @@ class IndustRealTaskPegsInsert(IndustRealEnvPegs, FactoryABCTask):
 
         # Simulate one step to apply changes
         self.simulate_and_refresh()
+    
+    def _reset_camera(self):
+        """Reset camera."""
+        # Get socket position
+        for i in range(self.num_envs):
+            socket_pos = self.socket_pos[i]
+            self._set_camera_pose(self.camera_handles[i], self.env_ptrs[i], socket_pos.detach().cpu().numpy()[:3])
 
     def _reset_buffers(self):
         """Reset buffers."""

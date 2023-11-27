@@ -38,6 +38,7 @@ import hydra
 import math
 import os
 import torch
+import numpy as np
 
 from isaacgym import gymapi, gymtorch, torch_utils
 from isaacgymenvs.tasks.factory.factory_base import FactoryBase
@@ -383,6 +384,7 @@ class IndustRealBase(FactoryBase, FactoryABCBase):
                                                         gymtorch.unwrap_tensor(self.ctrl_target_dof_pos),
                                                         gymtorch.unwrap_tensor(self.franka_actor_ids_sim),
                                                         len(self.franka_actor_ids_sim))
+
     def _set_dof_torque(self):
         """Set Franka DOF torque to move fingertips towards target pose."""
         self.dof_torque = fc.compute_dof_torque(
@@ -437,7 +439,7 @@ class IndustRealBase(FactoryBase, FactoryABCBase):
         """Move gripper to control target pose."""
 
         for _ in range(sim_steps):
-            # NOTE: midpoint is calculated based on the midpoint between the actual gripper finger pos, 
+            # NOTE: midpoint is calculated based on the midpoint between the actual gripper finger pos,
             # and centered is calculated with the assumption that the gripper fingers are perfectly mirrored.
             # Here we **intentionally** use *_centered_* pos and quat instead of *_midpoint_*,
             # since the fingertips are exactly mirrored in the real world.
@@ -502,3 +504,30 @@ class IndustRealBase(FactoryBase, FactoryABCBase):
         )
 
         return pos_in_robot_base, quat_in_robot_base
+
+    def _add_camera(self, env_ptr):
+        """Add a rgb camera to the scene.
+        Args:
+            look_at: The position the camera is looking at.
+        """
+        # Create the camera properties
+        camera_props = gymapi.CameraProperties()
+        camera_props.width = 256
+        camera_props.height = 256
+        camera_props.enable_tensors = True
+
+        # Create the camera
+        camera_handle = self.gym.create_camera_sensor(env_ptr, camera_props)
+        return camera_handle
+
+    def _set_camera_pose(self, camera_handle, env_ptr, look_at: np.ndarray):
+        # Set the camera position and orientation
+        pos_offset = np.random.random(3) * 0.03 + np.array([0.05, 0.0, 0.05])
+        cam_pos = gymapi.Vec3(look_at[0] + pos_offset[0], look_at[1] + pos_offset[1], look_at[2] + pos_offset[2])
+        look_at = gymapi.Vec3(look_at[0], look_at[1], look_at[2])
+
+        # Set the camera position and orientation
+        self.gym.set_camera_location(camera_handle, env_ptr, cam_pos, look_at)
+        # cam_pos = gymapi.Vec3(-1.0, -1.0, 2.0)
+        # cam_target = gymapi.Vec3(0.0, 0.0, 1.5)
+        # self.gym.set_camera_location(camera_handle, env_ptr, cam_pos, cam_target)

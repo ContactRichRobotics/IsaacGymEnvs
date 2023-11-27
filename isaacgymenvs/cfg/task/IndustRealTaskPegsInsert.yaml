@@ -21,6 +21,7 @@ env:
 
     socket_pos_obs_noise: [0.001, 0.001, 0.0]
     socket_rot_obs_noise: [0.0, 0.0, 0.0]  
+    enableCameraSensors: True  # enable visual
 
 randomize:
     franka_arm_initial_dof_pos: [-1.7574766278484677, 0.8403247702305783, 2.015877580177467, -2.0924931236718334, -0.7379389376686856, 1.6256438760537268, 1.2689337870766628]  # initial joint angles after reset; FrankX home pose
@@ -37,7 +38,7 @@ randomize:
     plug_pos_xy_noise: [0.01, 0.01]  # noise on plug position
 
 rl:
-    pos_action_scale: [0.01, 0.01, 0.01]
+    pos_action_scale: [0.1, 0.1, 0.1]  # [0.01, 0.01, 0.01]
     rot_action_scale: [0.01, 0.01, 0.01]
     force_action_scale: [1.0, 1.0, 1.0]
     torque_action_scale: [1.0, 1.0, 1.0]
