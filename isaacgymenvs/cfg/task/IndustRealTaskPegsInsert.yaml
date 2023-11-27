@@ -52,7 +52,7 @@ rl:
     num_keypoints: 4  # number of keypoints used in reward
     keypoint_scale: 0.5  # length of line of keypoints
 
-    max_episode_length: 256
+    max_episode_length: 512 # 256, 256
 
     # SAPU
     interpen_thresh: 0.001  # SAPU: max allowed interpenetration between plug and socket
