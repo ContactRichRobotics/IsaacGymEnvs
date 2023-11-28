@@ -528,6 +528,4 @@ class IndustRealBase(FactoryBase, FactoryABCBase):
 
         # Set the camera position and orientation
         self.gym.set_camera_location(camera_handle, env_ptr, cam_pos, look_at)
-        # cam_pos = gymapi.Vec3(-1.0, -1.0, 2.0)
-        # cam_target = gymapi.Vec3(0.0, 0.0, 1.5)
-        # self.gym.set_camera_location(camera_handle, env_ptr, cam_pos, cam_target)
+        
