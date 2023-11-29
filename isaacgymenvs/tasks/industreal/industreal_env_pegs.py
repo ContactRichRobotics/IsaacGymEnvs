@@ -499,6 +499,9 @@ class IndustRealEnvPegs(IndustRealBase, FactoryABCEnv):
         env_ptr = self.env_ptrs[env_idx]
         camera_handle = self.camera_handles[env_idx]
         camera_pose = self.gym.get_camera_transform(self.sim, env_ptr, camera_handle)
-        camera_pos =  np.array([camera_pose.p.x, camera_pose.p.y, camera_pose.p.z])
+        camera_pos = np.array([camera_pose.p.x, camera_pose.p.y, camera_pose.p.z])
         camera_quat = np.array([camera_pose.r.w, camera_pose.r.x, camera_pose.r.y, camera_pose.r.z])
+        if np.linalg.norm(camera_quat) < 1e-8:
+            print("Warning: camera_quat is zero")
+            camera_quat = np.array([1.0, 0.0, 0.0, 0.0])
         return camera_pos, camera_quat

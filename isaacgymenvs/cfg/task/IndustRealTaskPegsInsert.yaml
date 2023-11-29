@@ -120,4 +120,4 @@ visuo_servo:
     enable_plug_random_rot: True
     plug_random_rot_noise: [0.0, 0.3, 0.0]  # noise on plug rotation
     detection_noise_level: 0.000  # noise level for pose estimation
-    calibration_noise_level: 0.000  # noise level for pose estimation
+    calibration_noise_level: 0.00  # noise level for pose estimation
