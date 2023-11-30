@@ -190,7 +190,6 @@ def get_sapu_reward_scale(
     reward_scale = 1 - torch.tanh(
         max_interpen_dists[low_interpen_envs] / interpen_thresh
     )
-
     return low_interpen_envs, high_interpen_envs, reward_scale
 
 
